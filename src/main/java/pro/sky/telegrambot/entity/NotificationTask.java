@@ -1,12 +1,14 @@
 package pro.sky.telegrambot.entity;
 
+import java.sql.Time;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
-import java.time.LocalDate;
+import java.sql.Timestamp;
 
 @Getter
 @Setter
@@ -14,20 +16,21 @@ import java.time.LocalDate;
 public class NotificationTask {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    private Integer chat_id;
+    private Long chat_id;
     private String message;
-    private LocalDate datetime;
+    @Column(name="date_time")
+    private Timestamp dateTime;
 
     public NotificationTask() {
     }
 
-    public NotificationTask(Long id, Integer chat_id, String message, LocalDate datetime) {
+    public NotificationTask(Long id, Long chat_id, String message, Timestamp dateTime) {
         this.id = id;
         this.chat_id = chat_id;
         this.message = message;
-        this.datetime = datetime;
+        this.dateTime = dateTime;
     }
 }
