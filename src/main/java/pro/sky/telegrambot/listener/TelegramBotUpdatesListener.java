@@ -67,10 +67,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     @Scheduled(cron = "0 0/1 * * * *")
     private void sendMessage() {
-        NotificationTask notificationTask = notificationTaskService.getByDateTime();
-        if (notificationTask != null) {
-            SendMessage sendMessage = new SendMessage(notificationTask.getChat_id(), notificationTask.toString());
-            SendResponse response = telegramBot.execute(sendMessage);
-        }
+        List<NotificationTask> notificationTasks = notificationTaskService.getByDateTime();
+        notificationTasks.forEach(notificationTask -> {
+            if (notificationTask != null) {
+                SendMessage sendMessage = new SendMessage(notificationTask.getChat_id(), notificationTask.toString());
+                SendResponse response = telegramBot.execute(sendMessage);
+            }
+        });
     }
 }
