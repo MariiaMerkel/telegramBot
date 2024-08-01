@@ -3,6 +3,7 @@ package pro.sky.telegrambot.service;
 import com.pengrad.telegrambot.model.Message;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -74,5 +75,10 @@ public class NotificationTaskServiceImpl implements NotificationTaskService {
             match = m.group();
         }
         return match;
+    }
+
+    @Override public NotificationTask getByDateTime() {
+        LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
+        return notificationTaskRepository.findByDateTime(dateTime);
     }
 }

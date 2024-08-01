@@ -7,4 +7,5 @@ public interface NotificationTaskService {
 
     NotificationTask add(Message message);
 
+    NotificationTask getByDateTime();
 }

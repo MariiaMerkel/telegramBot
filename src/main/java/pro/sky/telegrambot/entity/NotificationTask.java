@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,12 +37,9 @@ public class NotificationTask {
     }
 
     @Override public String toString() {
-        return "NotificationTask{" +
-                "id=" + id +
-                ", chat_id=" + chat_id +
-                ", message='" + message + '\'' +
-                ", dateTime=" + dateTime +
-                '}';
+        return "Напоминание о задаче: " + '\n' +
+                "\"Необходимо " + message + "\"\n" +
+                "в " + dateTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
     }
 
     @Override public boolean equals(Object o) {

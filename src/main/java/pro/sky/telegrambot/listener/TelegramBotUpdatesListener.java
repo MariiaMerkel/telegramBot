@@ -5,11 +5,13 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.SendResponse;
 import jakarta.annotation.PostConstruct;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambot.entity.NotificationTask;
 import pro.sky.telegrambot.exception.CustomNotificationTaskException;
@@ -54,11 +56,21 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 notificationTask.getDateTime().
                                 format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")));
         SendMessage sendMessage = new SendMessage(notificationTask.getChat_id(), sendMessageText);
-        telegramBot.execute(sendMessage);
+        SendResponse response = telegramBot.execute(sendMessage);
     }
 
     private void sendMessage(Long chat_id, String exception) {
         SendMessage sendMessage = new SendMessage(chat_id, exception);
-        telegramBot.execute(sendMessage);
+        SendResponse response = telegramBot.execute(sendMessage);
+    }
+
+
+    @Scheduled(cron = "0 0/1 * * * *")
+    private void sendMessage() {
+        NotificationTask notificationTask = notificationTaskService.getByDateTime();
+        if (notificationTask != null) {
+            SendMessage sendMessage = new SendMessage(notificationTask.getChat_id(), notificationTask.toString());
+            SendResponse response = telegramBot.execute(sendMessage);
+        }
     }
 }
