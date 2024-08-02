@@ -1,78 +1,53 @@
 package pro.sky.telegrambot.listener;
 
-import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.UpdatesListener;
-import com.pengrad.telegrambot.model.Message;
-import com.pengrad.telegrambot.model.Update;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
-import jakarta.annotation.PostConstruct;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import pro.sky.telegrambot.entity.NotificationTask;
-import pro.sky.telegrambot.exception.CustomNotificationTaskException;
-import pro.sky.telegrambot.service.NotificationTaskService;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 
-@Service
-public class TelegramBotUpdatesListener implements UpdatesListener {
+@SpringBootTest
+@ActiveProfiles("test")
+class TelegramBotUpdatesListenerTest {
 
-    private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
-    private final NotificationTaskService notificationTaskService;
-    private final TelegramBot telegramBot;
+//    @Autowired
+//    private TelegramBotUpdatesListener telegramBotUpdatesListener;
 
-    public TelegramBotUpdatesListener(NotificationTaskService notificationTaskService, TelegramBot telegramBot) {
-        this.notificationTaskService = notificationTaskService;
-        this.telegramBot = telegramBot;
+    @Autowired
+    private TestRestTemplate testRestTemplate;
+
+    private String url;
+
+    @BeforeEach
+    void setUp() {
+        url = "https://api.telegram.org/bot6251835362:AAF3UEyXNaXhkFyfWsmbMrZNJTgNWnqbduM/sendMessage?text=hello&chat_id=1134627004";
     }
 
+//    @Test
+//    void contextLoads() {
+//        Assertions.assertThat(telegramBotUpdatesListener).isNotNull();
+//    }
 
-    @PostConstruct
-    public void init() {
-        telegramBot.setUpdatesListener(this);
-    }
+    @Test
+    void successSendMessage() {
 
-    @Override
-    public int process(List<Update> updates) {
-        updates.forEach(update -> {
-            Message message = update.message();
-            try {
-                NotificationTask notificationTask = notificationTaskService.add(message);
-                sendMessage(notificationTask);
-            } catch (CustomNotificationTaskException e) {
-                sendMessage(message.chat().id(), e.getMessage());
-            }
-        });
-        return UpdatesListener.CONFIRMED_UPDATES_ALL;
-    }
-
-    private void sendMessage(NotificationTask notificationTask) {
         String sendMessageText = String.format(
                 "Задача была добавлена в расписание, и я напомню %s в %s",
-                notificationTask.getMessage(),
-                notificationTask.getDateTime().
-                                format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")));
-        SendMessage sendMessage = new SendMessage(notificationTask.getChat_id(), sendMessageText);
-        SendResponse response = telegramBot.execute(sendMessage);
-    }
+                "Hello",
+                "2022-04-30 20:00");
+        SendMessage sendMessage = new SendMessage(1134627004, sendMessageText);
 
-    private void sendMessage(Long chat_id, String exception) {
-        SendMessage sendMessage = new SendMessage(chat_id, exception);
-        SendResponse response = telegramBot.execute(sendMessage);
-    }
+        String actual = testRestTemplate.postForObject(url, sendMessage, String.class);
+        //SendResponse response = telegramBot.execute(sendMessage);
 
-
-    @Scheduled(cron = "0 0/1 * * * *")
-    private void sendMessage() {
-        List<NotificationTask> notificationTasks = notificationTaskService.getByDateTime();
-        notificationTasks.forEach(notificationTask -> {
-            if (notificationTask != null) {
-                SendMessage sendMessage = new SendMessage(notificationTask.getChat_id(), notificationTask.toString());
-                SendResponse response = telegramBot.execute(sendMessage);
-            }
-        });
+        assertThat(actual).isEqualTo("Hello");
     }
 }

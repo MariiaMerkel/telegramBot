@@ -1,5 +1,5 @@
-/src/main/resources/application-office.properties
 /telegram-bot.iml
 /.idea/
 /target/
 /src/main/resources/application-dev.properties
+/src/test/java/resources/application-test.properties
